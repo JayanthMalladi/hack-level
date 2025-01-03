@@ -14,14 +14,14 @@ export class LangflowClient {
     headers["Authorization"] = `Bearer ${this.applicationToken}`;
     headers["Content-Type"] = "application/json";
     
-    const url = `${this.baseURL}${endpoint}`;
+    const url = `/api${endpoint}`;
 
     try {
       const response = await fetch(url, {
         method: 'POST',
         headers: headers,
         mode: 'cors',
-        credentials: 'omit',
+        credentials: 'same-origin',
         body: JSON.stringify(body)
       });
 
@@ -115,6 +115,6 @@ export class LangflowClient {
 }
 
 export const langflowClient = new LangflowClient(
-  'https://api.langflow.astra.datastax.com',
+  '',
   'AstraCS:YKRGKfIXjCsXShKGmPoWZLoQ:3c2bcc8d06a34fd2fe32d8a084a9e5dee0e63617c1eab8d0f7f6243e15f5c68f'
 ); 

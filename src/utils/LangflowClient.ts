@@ -13,27 +13,29 @@ export class LangflowClient {
   async post(endpoint: string, body: any, headers: Record<string, string> = {}) {
     headers["Authorization"] = `Bearer ${this.applicationToken}`;
     headers["Content-Type"] = "application/json";
-    headers["Access-Control-Allow-Origin"] = "*";
-    headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS";
-    headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization";
     
-    const url = import.meta.env.PROD 
-      ? `${this.baseURL}${endpoint}`
-      : `/api${endpoint}`;
+    const url = `${this.baseURL}${endpoint}`;
 
     try {
       const response = await fetch(url, {
         method: 'POST',
         headers: headers,
         mode: 'cors',
-        credentials: import.meta.env.PROD ? 'include' : 'same-origin',
+        credentials: 'omit',
         body: JSON.stringify(body)
       });
 
-      const responseMessage = await response.json();
       if (!response.ok) {
-        throw new Error(`${response.status} ${response.statusText} - ${JSON.stringify(responseMessage)}`);
+        const errorText = await response.text();
+        console.error('API Error:', {
+          status: response.status,
+          statusText: response.statusText,
+          body: errorText
+        });
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
+
+      const responseMessage = await response.json();
       return responseMessage;
     } catch (error) {
       console.error('Request Error:', error);
@@ -113,6 +115,6 @@ export class LangflowClient {
 }
 
 export const langflowClient = new LangflowClient(
-  import.meta.env.VITE_LANGFLOW_API_URL || 'https://api.langflow.astra.datastax.com',
-  import.meta.env.VITE_LANGFLOW_API_KEY || 'AstraCS:YKRGKfIXjCsXShKGmPoWZLoQ:3c2bcc8d06a34fd2fe32d8a084a9e5dee0e63617c1eab8d0f7f6243e15f5c68f'
+  'https://api.langflow.astra.datastax.com',
+  'AstraCS:YKRGKfIXjCsXShKGmPoWZLoQ:3c2bcc8d06a34fd2fe32d8a084a9e5dee0e63617c1eab8d0f7f6243e15f5c68f'
 ); 

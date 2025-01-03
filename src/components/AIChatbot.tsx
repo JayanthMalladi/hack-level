@@ -191,7 +191,7 @@ Please maintain consistent formatting with proper spacing and indentation.`;
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white rounded-xl w-full max-w-2xl h-[600px] flex flex-col relative">
         <div className="flex items-center justify-between p-4 border-b">
-          <h2 className="text-xl font-semibold text-gray-800">AI Insights</h2>
+          <h2 className="text-xl font-semibold text-gray-800">Snapfluence AI Insights</h2>
           <button
             onClick={onClose}
             className="p-1 hover:bg-gray-100 rounded-full transition-colors"

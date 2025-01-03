@@ -492,8 +492,8 @@ export default function Dashboard() {
   return (
     <div className="p-6 pt-24 max-w-7xl mx-auto bg-gray-50">
       <div className="flex items-center justify-between mb-8">
-        <h1 className="text-4xl font-bold bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">
-          Social Media Analytics Dashboard
+        <h1 className="text-2xl font-bold text-gray-800">
+          Snapfluence Dashboard
         </h1>
         <div className="flex items-center gap-4">
           <button

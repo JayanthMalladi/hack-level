@@ -13,12 +13,16 @@ export class LangflowClient {
   async post(endpoint: string, body: any, headers: Record<string, string> = {}) {
     headers["Authorization"] = `Bearer ${this.applicationToken}`;
     headers["Content-Type"] = "application/json";
+    
+    // Always use the full URL in production
     const url = `${this.baseURL}${endpoint}`;
 
     try {
       const response = await fetch(url, {
         method: 'POST',
         headers: headers,
+        mode: 'cors',
+        credentials: 'omit', // Change to 'omit' to avoid CORS preflight
         body: JSON.stringify(body)
       });
 
@@ -104,7 +108,7 @@ export class LangflowClient {
   }
 }
 
-// Create and export a singleton instance
+// Update the singleton instance
 export const langflowClient = new LangflowClient(
   'https://api.langflow.astra.datastax.com',
   'AstraCS:YKRGKfIXjCsXShKGmPoWZLoQ:3c2bcc8d06a34fd2fe32d8a084a9e5dee0e63617c1eab8d0f7f6243e15f5c68f'

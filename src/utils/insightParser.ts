@@ -49,52 +49,50 @@ export function parseInsights(response: string): InsightData {
   };
 
   try {
-    // Extract metrics with improved regex patterns
+    // Extract metrics with more precise patterns
     const metricsMatch = response.match(/Metrics:([^]*?)(?=Direct Answer:|$)/i);
     if (metricsMatch) {
       const metricsText = metricsMatch[1];
       
-      // Extract engagement rate - look for decimal numbers followed by %
-      const engagementMatch = metricsText.match(/(?:engagement|rate)[^\d]*?([\d.]+)%/i);
+      // Extract engagement rate with exact pattern
+      const engagementMatch = metricsText.match(/Engagement Rate:\s*([\d.]+)%/i);
       insights.metrics.engagement = engagementMatch ? `${engagementMatch[1]}%` : '0%';
 
-      // Extract numeric values with better patterns
-      const likesMatch = metricsText.match(/(?:likes|like)[^\d]*?([\d,]+)/i);
-      insights.metrics.likes = likesMatch ? likesMatch[1].replace(/,/g, '') : '0';
+      // Extract numeric values with exact patterns
+      const likesMatch = metricsText.match(/Likes:\s*(\d+)/i);
+      insights.metrics.likes = likesMatch ? likesMatch[1] : '0';
 
-      const sharesMatch = metricsText.match(/(?:shares|share)[^\d]*?([\d,]+)/i);
-      insights.metrics.shares = sharesMatch ? sharesMatch[1].replace(/,/g, '') : '0';
+      const sharesMatch = metricsText.match(/Shares:\s*(\d+)/i);
+      insights.metrics.shares = sharesMatch ? sharesMatch[1] : '0';
 
-      const commentsMatch = metricsText.match(/(?:comments|comment)[^\d]*?([\d,]+)/i);
-      insights.metrics.comments = commentsMatch ? commentsMatch[1].replace(/,/g, '') : '0';
+      const commentsMatch = metricsText.match(/Comments:\s*(\d+)/i);
+      insights.metrics.comments = commentsMatch ? commentsMatch[1] : '0';
 
-      const viewsMatch = metricsText.match(/(?:views|view)[^\d]*?([\d,]+)/i);
-      insights.metrics.views = viewsMatch ? viewsMatch[1].replace(/,/g, '') : '0';
+      const viewsMatch = metricsText.match(/Views:\s*(\d+)/i);
+      insights.metrics.views = viewsMatch ? viewsMatch[1] : '0';
 
-      // Extract age groups with improved pattern
-      insights.metrics.ageGroups = Array.from(
-        metricsText.matchAll(/(\d+(?:-\d+)?(?:\s*(?:male|female|other))?)/gi),
-        match => match[1]
-      );
+      // Extract age groups with exact pattern
+      const ageGroupMatch = metricsText.match(/Primary Age Group:\s*([\d-]+)/i);
+      insights.metrics.ageGroups = ageGroupMatch ? [ageGroupMatch[1]] : [];
     }
 
-    // Extract predictions with improved patterns
+    // Extract predictions with exact patterns
     const directMatch = response.match(/Direct Answer:([^]*?)(?=Explanation:|$)/i);
     if (directMatch) {
       const directText = directMatch[1];
       
-      // Look for numbers after "Expected" labels
-      const expectedLikes = directText.match(/Expected Likes[^\d]*([\d,]+)/i);
-      insights.predictions.likes = expectedLikes ? expectedLikes[1].replace(/,/g, '') : '0';
+      // Look for exact number patterns
+      const expectedLikes = directText.match(/Expected Likes:\s*Around\s*(\d+)/i);
+      insights.predictions.likes = expectedLikes ? expectedLikes[1] : '0';
 
-      const expectedShares = directText.match(/Expected Shares[^\d]*([\d,]+)/i);
-      insights.predictions.shares = expectedShares ? expectedShares[1].replace(/,/g, '') : '0';
+      const expectedShares = directText.match(/Expected Shares:\s*(?:Around|Approximately)\s*(\d+)/i);
+      insights.predictions.shares = expectedShares ? expectedShares[1] : '0';
 
-      const expectedComments = directText.match(/Expected Comments[^\d]*([\d,]+)/i);
-      insights.predictions.comments = expectedComments ? expectedComments[1].replace(/,/g, '') : '0';
+      const expectedComments = directText.match(/Expected Comments:\s*Around\s*(\d+)/i);
+      insights.predictions.comments = expectedComments ? expectedComments[1] : '0';
 
-      const expectedViews = directText.match(/Expected Views[^\d]*([\d,]+)/i);
-      insights.predictions.views = expectedViews ? expectedViews[1].replace(/,/g, '') : '0';
+      const expectedViews = directText.match(/Expected Views:\s*(?:Around|Approximately)\s*(\d+)/i);
+      insights.predictions.views = expectedViews ? expectedViews[1] : '0';
     }
 
     // Extract analysis with improved pattern

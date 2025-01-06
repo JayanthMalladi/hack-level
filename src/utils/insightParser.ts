@@ -23,7 +23,6 @@ export interface InsightData {
 }
 
 export function parseInsights(response: string): InsightData {
-  // Default values
   const insights: InsightData = {
     metrics: {
       engagement: '0%',
@@ -49,75 +48,71 @@ export function parseInsights(response: string): InsightData {
   };
 
   try {
-    // Extract metrics section
-    const metricsMatch = response.match(/Metrics:([^]*?)(?=Direct Answer:|$)/i);
+    // Extract metrics with exact patterns
+    const metricsMatch = response.match(/Metrics:\s*([^]*?)(?=Direct Answer:|$)/i);
     if (metricsMatch) {
       const metricsText = metricsMatch[1];
 
-      // Extract specific metrics with approximate values
-      const likesMatch = metricsText.match(/Likes:\s*(?:Approximately|About|Around|Roughly)\s*([\d,]+)/i);
-      insights.metrics.likes = likesMatch ? likesMatch[1].replace(/,/g, '') : '0';
+      // Extract exact numbers with specific patterns
+      const extractMetric = (pattern: string): string => {
+        const match = metricsText.match(new RegExp(pattern, 'i'));
+        return match ? match[1].replace(/,/g, '') : '0';
+      };
 
-      const sharesMatch = metricsText.match(/Shares:\s*(?:Approximately|About|Around|Roughly)\s*([\d,]+)/i);
-      insights.metrics.shares = sharesMatch ? sharesMatch[1].replace(/,/g, '') : '0';
-
-      const commentsMatch = metricsText.match(/Comments:\s*(?:Approximately|About|Around|Roughly)\s*([\d,]+)/i);
-      insights.metrics.comments = commentsMatch ? commentsMatch[1].replace(/,/g, '') : '0';
-
-      const viewsMatch = metricsText.match(/Views:\s*(?:Approximately|About|Around|Roughly)\s*([\d,]+)/i);
-      insights.metrics.views = viewsMatch ? viewsMatch[1].replace(/,/g, '') : '0';
-
-      const engagementMatch = metricsText.match(/Engagement Rate:\s*(?:Approximately|About|Around|Roughly)\s*([\d.]+)%/i);
-      insights.metrics.engagement = engagementMatch ? `${engagementMatch[1]}%` : '0%';
-
+      insights.metrics.engagement = extractMetric('engagement rate:\\s*([\\d.]+)%') + '%';
+      insights.metrics.likes = extractMetric('average likes:\\s*([\\d,]+)');
+      insights.metrics.shares = extractMetric('average shares:\\s*([\\d,]+)');
+      insights.metrics.comments = extractMetric('average comments:\\s*([\\d,]+)');
+      insights.metrics.views = extractMetric('average views:\\s*([\\d,]+)');
+      
       // Extract age groups
-      const ageMatch = metricsText.match(/(\d+(?:-\d+)?)\s*year-olds?/i);
-      if (ageMatch) {
-        insights.metrics.ageGroups = [ageMatch[1]];
-      }
+      const ageMatch = metricsText.match(/primary age groups?:\s*([\d-]+)/i);
+      insights.metrics.ageGroups = ageMatch ? [ageMatch[1]] : [];
     }
 
-    // Extract predictions from Direct Answer section
-    const directMatch = response.match(/Direct Answer:([^]*?)(?=Explanation:|$)/i);
+    // Extract predictions with exact patterns
+    const directMatch = response.match(/Direct Answer:\s*([^]*?)(?=Explanation:|$)/i);
     if (directMatch) {
       const directText = directMatch[1];
-      
-      // Use the same metrics for predictions since they match
-      insights.predictions = {
-        likes: insights.metrics.likes,
-        shares: insights.metrics.shares,
-        comments: insights.metrics.comments,
-        views: insights.metrics.views
+
+      const extractPrediction = (pattern: string): string => {
+        const match = directText.match(new RegExp(pattern, 'i'));
+        return match ? match[1].replace(/,/g, '') : '0';
       };
+
+      insights.predictions.likes = extractPrediction('Expected Likes:\\s*([\\d,]+)');
+      insights.predictions.shares = extractPrediction('Expected Shares:\\s*([\\d,]+)');
+      insights.predictions.comments = extractPrediction('Expected Comments:\\s*([\\d,]+)');
+      insights.predictions.views = extractPrediction('Expected Views:\\s*([\\d,]+)');
     }
 
     // Extract explanation
-    const explanationMatch = response.match(/Explanation:([^]*?)(?=Suggestions:|$)/i);
+    const explanationMatch = response.match(/Explanation:\s*([^]*?)(?=Suggestions:|$)/i);
     if (explanationMatch) {
       insights.analysis = explanationMatch[1].trim();
     }
 
     // Extract recommendations
-    const suggestionsMatch = response.match(/Suggestions:([^]*?)$/i);
+    const suggestionsMatch = response.match(/Suggestions:\s*([^]*?)$/i);
     if (suggestionsMatch) {
       const suggestionsText = suggestionsMatch[1];
 
-      // Extract timing
-      const timingMatch = suggestionsText.match(/Optimal Posting Time:([^]*?)(?=Hashtags:|$)/i);
+      // Extract timing with exact pattern
+      const timingMatch = suggestionsText.match(/Optimal Posting Time:\s*([^]*?)(?=-|$)/i);
       insights.recommendations.timing = timingMatch ? timingMatch[1].trim() : '';
 
-      // Extract hashtags - look for words starting with #
+      // Extract hashtags
       insights.recommendations.hashtags = Array.from(
         suggestionsText.matchAll(/#[\w\d]+/g),
         match => match[0]
       );
 
       // Extract content tips
-      const contentMatch = suggestionsText.match(/Content Quality:([^]*?)(?=Target Audience:|$)/i);
+      const contentMatch = suggestionsText.match(/Content Quality:\s*([^]*?)(?=-|$)/i);
       insights.recommendations.contentTips = contentMatch ? contentMatch[1].trim() : '';
 
       // Extract audience info
-      const audienceMatch = suggestionsText.match(/Target Audience:([^]*?)$/i);
+      const audienceMatch = suggestionsText.match(/Target Audience:\s*([^]*?)(?=-|$)/i);
       insights.recommendations.audience = audienceMatch ? audienceMatch[1].trim() : '';
     }
 

@@ -1,103 +1,182 @@
-import React from 'react';
+import { Link } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import AnalyticsIllustration from './illustrations/AnalyticsIllustration';
-import { Play, ArrowRight, BarChart2, TrendingUp, Users } from 'lucide-react';
+import { BarChart2, TrendingUp, Users, Zap } from 'lucide-react';
 
-const Hero = () => {
+export default function Hero() {
+  const textAnimation = {
+    hidden: { opacity: 0 },
+    visible: (i = 1) => ({
+      opacity: 1,
+      transition: { staggerChildren: 0.04, delayChildren: 0.04 * i },
+    }),
+  };
+
+  const letterAnimation = {
+    hidden: { opacity: 0, y: 50 },
+    visible: {
+      opacity: 1,
+      y: 0,
+    },
+  };
+
+  const title = "Elevate Your Social Media Analytics";
+  const titleArray = Array.from(title);
+
+  const features = [
+    {
+      icon: <BarChart2 className="w-6 h-6 text-green-500" />,
+      title: "Real-time Analytics",
+      description: "Track your social media performance with live data visualization"
+    },
+    {
+      icon: <TrendingUp className="w-6 h-6 text-blue-500" />,
+      title: "Engagement Metrics",
+      description: "Monitor likes, shares, and comments across all platforms"
+    },
+    {
+      icon: <Users className="w-6 h-6 text-purple-500" />,
+      title: "Audience Insights",
+      description: "Understand your audience demographics and behavior"
+    },
+    {
+      icon: <Zap className="w-6 h-6 text-yellow-500" />,
+      title: "Performance Tracking",
+      description: "Measure content performance and engagement rates"
+    }
+  ];
+
   return (
-    <div className="min-h-[calc(100vh-80px)] relative px-8">
-      <div className="max-w-7xl mx-auto flex flex-col items-center">
-        {/* Main Heading */}
-        <h1 className="text-7xl font-bold text-center gradient-text mb-6">
-          Elevate Your Experience
-        </h1>
-        
-        <p className="text-xl text-gray-600 text-center mb-16 max-w-2xl">
-          Unlock the power of data-driven social media analytics
-        </p>
+    <div className="relative min-h-screen">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-16">
+        <motion.div 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.8 }}
+          className="text-center"
+        >
+          <motion.h1 
+            className="text-5xl md:text-6xl font-bold mb-8 gradient-text flex justify-center flex-wrap"
+            variants={textAnimation}
+            initial="hidden"
+            animate="visible"
+          >
+            {titleArray.map((letter, index) => (
+              <motion.span
+                key={index}
+                variants={letterAnimation}
+                className={letter === " " ? "mr-4" : ""}
+              >
+                {letter}
+              </motion.span>
+            ))}
+          </motion.h1>
+          
+          <motion.p 
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.4, duration: 0.8 }}
+            className="text-xl text-gray-600 mb-12 max-w-3xl mx-auto"
+          >
+            Transform your social media data into actionable insights with our powerful analytics dashboard.
+          </motion.p>
 
-        <div className="w-full grid grid-cols-3 gap-8 items-start">
-          {/* Left Content */}
-          <div className="flex flex-col">
-            <div className="flex items-center gap-3 mb-3">
-              <BarChart2 className="w-6 h-6 text-green-400" />
-              <h2 className="text-xl font-semibold">Track Performance</h2>
+          <motion.div
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.6, duration: 0.8 }}
+            className="flex justify-center gap-4 mb-16"
+          >
+            <Link
+              to="/dashboard"
+              className="px-8 py-3 bg-gradient-to-r from-green-600 to-green-500 text-white rounded-full font-semibold hover:from-green-700 hover:to-green-600 transition-all duration-300 shadow-lg hover:shadow-xl"
+            >
+              Get Started
+            </Link>
+            <Link
+              to="/about"
+              className="px-8 py-3 bg-white text-gray-800 rounded-full font-semibold hover:bg-gray-50 transition-all duration-300 shadow-lg hover:shadow-xl"
+            >
+              Learn More
+            </Link>
+          </motion.div>
+        </motion.div>
+
+        <motion.div
+          initial={{ scale: 0.8, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ delay: 0.8, duration: 0.8 }}
+          className="max-w-3xl mx-auto mb-20"
+        >
+          <div className="relative">
+            <div className="absolute inset-0 bg-gradient-to-r from-green-50 to-blue-50 rounded-2xl transform rotate-1"></div>
+            <div className="relative bg-white rounded-2xl shadow-2xl p-4">
+              <div className="w-3/4 mx-auto">
+                <AnalyticsIllustration />
+              </div>
             </div>
-            <p className="text-gray-600 text-base">
-              Get real-time insights into your social media performance. Monitor engagement, reach, and growth across all platforms in one unified dashboard.
+          </div>
+        </motion.div>
+
+        <section id="features" className="py-20">
+          <motion.h2
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            transition={{ duration: 0.5 }}
+            className="text-3xl font-bold text-center mb-12 gradient-text"
+          >
+            Powerful Features for Better Insights
+          </motion.h2>
+
+          <motion.div 
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            transition={{ duration: 0.8, delay: 0.2 }}
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8"
+          >
+            {features.map((feature, index) => (
+              <motion.div
+                key={feature.title}
+                initial={{ y: 20, opacity: 0 }}
+                whileInView={{ y: 0, opacity: 1 }}
+                transition={{ duration: 0.5, delay: index * 0.1 }}
+                whileHover={{ y: -5 }}
+                className="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300"
+              >
+                <div className="bg-gray-50 w-12 h-12 rounded-lg flex items-center justify-center mb-4">
+                  {feature.icon}
+                </div>
+                <h3 className="text-xl font-semibold mb-2">{feature.title}</h3>
+                <p className="text-gray-600">{feature.description}</p>
+              </motion.div>
+            ))}
+          </motion.div>
+        </section>
+
+        <section className="py-20">
+          <motion.div
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            transition={{ duration: 0.8 }}
+            className="bg-gradient-to-r from-green-50 to-blue-50 rounded-2xl p-12 text-center"
+          >
+            <h2 className="text-3xl font-bold mb-6 gradient-text">Ready to Transform Your Analytics?</h2>
+            <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
+              Start making data-driven decisions today with our comprehensive analytics dashboard.
             </p>
-          </div>
-
-          {/* Center Illustration */}
-          <div className="flex flex-col items-center">
-            <div className="w-full max-w-[500px] mb-8">
-              <AnalyticsIllustration />
-            </div>
-            
-            {/* Buttons moved below illustration */}
-            <div className="flex gap-4">
-              <button className="bg-green-400 text-white px-6 py-2 rounded-full text-sm font-semibold hover:bg-green-500 transition-colors flex items-center gap-2">
-                Get Started <ArrowRight className="w-4 h-4" />
-              </button>
-              <button className="border-2 border-green-400 text-green-400 px-6 py-2 rounded-full text-sm font-semibold hover:bg-green-400 hover:text-white transition-colors flex items-center gap-2">
-                Watch Demo <Play className="w-4 h-4" />
-              </button>
-            </div>
-          </div>
-
-          {/* Right Content */}
-          <div className="flex flex-col">
-            <div className="flex items-center gap-3 mb-3">
-              <TrendingUp className="w-6 h-6 text-green-400" />
-              <h2 className="text-xl font-semibold">Optimize Strategy</h2>
-            </div>
-            <p className="text-gray-600 text-base">
-              Make data-backed decisions to improve your content strategy. Our AI-powered recommendations help you understand what works and why.
-            </p>
-          </div>
-        </div>
-
-        {/* Additional Visual Elements */}
-        <div className="grid grid-cols-3 gap-8 mt-16">
-          <div className="flex items-center gap-4 p-6 rounded-xl bg-white/50 backdrop-blur-sm border border-gray-100">
-            <Users className="w-8 h-8 text-green-400" />
-            <div>
-              <div className="text-2xl font-bold">10K+</div>
-              <div className="text-gray-600">Active Users</div>
-            </div>
-          </div>
-          <div className="flex items-center gap-4 p-6 rounded-xl bg-white/50 backdrop-blur-sm border border-gray-100">
-            <BarChart2 className="w-8 h-8 text-green-400" />
-            <div>
-              <div className="text-2xl font-bold">85%</div>
-              <div className="text-gray-600">Growth Rate</div>
-            </div>
-          </div>
-          <div className="flex items-center gap-4 p-6 rounded-xl bg-white/50 backdrop-blur-sm border border-gray-100">
-            <TrendingUp className="w-8 h-8 text-green-400" />
-            <div>
-              <div className="text-2xl font-bold">24/7</div>
-              <div className="text-gray-600">Analytics</div>
-            </div>
-          </div>
-        </div>
+            <Link
+              to="/dashboard"
+              className="inline-block px-8 py-3 bg-gradient-to-r from-green-600 to-green-500 text-white rounded-full font-semibold hover:from-green-700 hover:to-green-600 transition-all duration-300 shadow-lg hover:shadow-xl"
+            >
+              Get Started Now
+            </Link>
+          </motion.div>
+        </section>
       </div>
 
-      {/* Background Elements */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none -z-10">
-        {[...Array(8)].map((_, i) => (
-          <div
-            key={i}
-            className="neon-circle"
-            style={{
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-              animationDelay: `${i * 1.5}s`,
-            }}
-          />
-        ))}
-      </div>
+      {/* Animated background elements */}
+      <div className="absolute top-40 left-0 neon-circle opacity-20"></div>
+      <div className="absolute bottom-40 right-0 neon-circle opacity-20"></div>
     </div>
   );
-};
-
-export default Hero;
+}

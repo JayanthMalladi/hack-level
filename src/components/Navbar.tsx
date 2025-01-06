@@ -13,7 +13,7 @@ export default function Navbar() {
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center">
             <Link to="/" className="text-xl font-bold gradient-text">
-              SnapFluence
+              YourLogo
             </Link>
           </div>
           
@@ -39,6 +39,16 @@ export default function Navbar() {
                 }`}
               >
                 Dashboard
+              </Link>
+              <Link
+                to="/about"
+                className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                  isActive('/about') 
+                    ? 'text-green-600 bg-green-50' 
+                    : 'text-gray-700 hover:text-green-600 hover:bg-green-50'
+                }`}
+              >
+                About
               </Link>
               {/* Add other menu items here */}
             </div>
@@ -98,6 +108,16 @@ export default function Navbar() {
             }`}
           >
             Dashboard
+          </Link>
+          <Link
+            to="/about"
+            className={`block px-3 py-2 rounded-md text-base font-medium ${
+              isActive('/about') 
+                ? 'text-green-600 bg-green-50' 
+                : 'text-gray-700 hover:text-green-600 hover:bg-green-50'
+            }`}
+          >
+            About
           </Link>
           {/* Add other mobile menu items here */}
         </div>

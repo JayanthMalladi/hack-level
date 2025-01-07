@@ -1,5 +1,5 @@
 import { InsightData } from '../utils/insightParser';
-import { TrendingUp, Clock, Hash, Target, BookOpen } from 'lucide-react';
+import { TrendingUp, Clock, Hash, Target, BookOpen, BarChart2 } from 'lucide-react';
 
 interface InsightsDisplayProps {
   insights: InsightData;
@@ -26,6 +26,23 @@ export function InsightsDisplay({ insights }: InsightsDisplayProps) {
           {/* Add other metrics similarly */}
         </div>
       </div>
+
+      {insights.formatInsights.length > 0 && (
+        <div className="bg-white rounded-lg p-6 shadow-sm">
+          <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
+            <BarChart2 className="w-5 h-5 text-blue-500" />
+            Format Performance
+          </h3>
+          <ul className="space-y-2">
+            {insights.formatInsights.map((insight, index) => (
+              <li key={index} className="flex items-start gap-2">
+                <div className="w-1.5 h-1.5 rounded-full bg-blue-500 mt-2" />
+                <span className="text-gray-700">{insight}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
 
       {/* Predictions Section */}
       <div className="bg-white rounded-lg p-6 shadow-sm">

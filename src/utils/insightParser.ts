@@ -6,6 +6,7 @@ export interface InsightData {
     comments: string;
     views: string;
     ageGroups: string[];
+    genderSplit?: string;
   };
   formatInsights: string[];
   predictions: {
@@ -31,7 +32,8 @@ export function parseInsights(response: string): InsightData {
       shares: '0',
       comments: '0',
       views: '0',
-      ageGroups: []
+      ageGroups: [],
+      genderSplit: ''
     },
     formatInsights: [],
     predictions: {
@@ -51,31 +53,38 @@ export function parseInsights(response: string): InsightData {
 
   try {
     // Extract metrics section
-    const metricsMatch = response.match(/METRICS:\n([^]*?)(?=\n\nFORMAT_INSIGHTS:)/i);
+    const metricsMatch = response.match(/### Metrics([^]*?)(?=### Format Insights|$)/i);
     if (metricsMatch) {
       const metricsText = metricsMatch[1];
-      
-      // Extract each metric with exact patterns
+
+      // Extract metrics using more precise patterns
       const extractMetric = (pattern: string): string => {
         const match = metricsText.match(new RegExp(pattern, 'i'));
         return match ? match[1].replace(/,/g, '').trim() : '0';
       };
 
       insights.metrics = {
-        engagement: extractMetric('Engagement Rate:\\s*([\\d.]+)%') + '%',
-        likes: extractMetric('Average Likes:\\s*([\\d,]+)'),
-        shares: extractMetric('Average Shares:\\s*([\\d,]+)'),
-        comments: extractMetric('Average Comments:\\s*([\\d,]+)'),
-        views: extractMetric('Average Views:\\s*([\\d,]+)'),
-        ageGroups: (metricsText.match(/Primary Age Groups:\s*([^\n]+)/i)?.[1] || '')
-          .split(',')
-          .map(group => group.trim())
-          .filter(Boolean)
+        engagement: extractMetric('Engagement Rate:.*?([\\d.]+)%') + '%',
+        likes: extractMetric('Likes:.*?([\\d,]+)'),
+        shares: extractMetric('Shares:.*?([\\d,]+)'),
+        comments: extractMetric('Comments:.*?([\\d,]+)'),
+        views: extractMetric('Views:.*?([\\d,]+)'),
+        ageGroups: [],
+        genderSplit: metricsText.match(/Gender Split:.*?([^\n]+)/i)?.[1]?.trim() || ''
       };
+
+      // Extract age groups
+      const ageGroupMatch = metricsText.match(/Primary Age Group:.*?([^\n]+)/i);
+      if (ageGroupMatch) {
+        insights.metrics.ageGroups = ageGroupMatch[1]
+          .split(/,|\band\b/)
+          .map(group => group.trim())
+          .filter(Boolean);
+      }
     }
 
     // Extract format insights
-    const formatMatch = response.match(/FORMAT_INSIGHTS:\n([^]*?)(?=\n\nDIRECT_ANSWER:)/i);
+    const formatMatch = response.match(/### Format Insights([^]*?)(?=### Predictions|$)/i);
     if (formatMatch) {
       insights.formatInsights = formatMatch[1]
         .split('\n')
@@ -84,52 +93,57 @@ export function parseInsights(response: string): InsightData {
         .map(line => line.substring(1).trim());
     }
 
-    // Extract predictions from Direct Answer
-    const directMatch = response.match(/DIRECT_ANSWER:\n([^]*?)(?=\n\nEXPLANATION:)/i);
-    if (directMatch) {
-      const directText = directMatch[1];
+    // Extract predictions
+    const predictionsMatch = response.match(/### Predictions([^]*?)(?=### Explanation|$)/i);
+    if (predictionsMatch) {
+      const predictionsText = predictionsMatch[1];
       
       const extractPrediction = (pattern: string): string => {
-        const match = directText.match(new RegExp(pattern, 'i'));
+        const match = predictionsText.match(new RegExp(pattern, 'i'));
         return match ? match[1].replace(/,/g, '').trim() : '0';
       };
 
       insights.predictions = {
-        likes: extractPrediction('Expected Likes:\\s*([\\d,]+)'),
-        shares: extractPrediction('Expected Shares:\\s*([\\d,]+)'),
-        comments: extractPrediction('Expected Comments:\\s*([\\d,]+)'),
-        views: extractPrediction('Expected Views:\\s*([\\d,]+)')
+        likes: extractPrediction('Expected Likes:.*?([\\d,]+)'),
+        shares: extractPrediction('Expected Shares:.*?([\\d,]+)'),
+        comments: extractPrediction('Expected Comments:.*?([\\d,]+)'),
+        views: extractPrediction('Expected Views:.*?([\\d,]+)')
       };
     }
 
     // Extract explanation
-    const explanationMatch = response.match(/EXPLANATION:\n([^]*?)(?=\n\nSUGGESTIONS:)/i);
+    const explanationMatch = response.match(/### Explanation([^]*?)(?=### Suggestions|$)/i);
     if (explanationMatch) {
-      insights.analysis = explanationMatch[1].trim();
+      insights.analysis = explanationMatch[1]
+        .split('\n')
+        .map(line => line.trim())
+        .filter(line => line.startsWith('-'))
+        .map(line => line.substring(1).trim())
+        .join(' ');
     }
 
-    // Extract recommendations
-    const suggestionsMatch = response.match(/SUGGESTIONS:\n([^]*?)$/i);
+    // Extract suggestions
+    const suggestionsMatch = response.match(/### Suggestions([^]*?)$/i);
     if (suggestionsMatch) {
       const suggestionsText = suggestionsMatch[1];
 
       // Extract timing
-      const timingMatch = suggestionsText.match(/TIMING:\n([^]*?)(?=\n\nHASHTAGS:)/i);
+      const timingMatch = suggestionsText.match(/Optimal Posting Time:.*?([^\n]+)/i);
       insights.recommendations.timing = timingMatch ? timingMatch[1].trim() : '';
 
       // Extract hashtags
-      const hashtagsMatch = suggestionsText.match(/HASHTAGS:\n([^]*?)(?=\n\nCONTENT:)/i);
+      const hashtagsMatch = suggestionsText.match(/Hashtags:.*?([^\n]+)/i);
       if (hashtagsMatch) {
         insights.recommendations.hashtags = hashtagsMatch[1]
           .match(/#[\w\d]+/g) || [];
       }
 
       // Extract content tips
-      const contentMatch = suggestionsText.match(/CONTENT:\n([^]*?)(?=\n\nAUDIENCE:)/i);
+      const contentMatch = suggestionsText.match(/Content Quality:.*?([^\n]+)/i);
       insights.recommendations.contentTips = contentMatch ? contentMatch[1].trim() : '';
 
       // Extract audience info
-      const audienceMatch = suggestionsText.match(/AUDIENCE:\n([^]*?)$/i);
+      const audienceMatch = suggestionsText.match(/Target Audience:.*?([^\n]+)/i);
       insights.recommendations.audience = audienceMatch ? audienceMatch[1].trim() : '';
     }
 

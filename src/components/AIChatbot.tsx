@@ -49,53 +49,44 @@ export default function AIChatbot({ isOpen, onClose, dashboardData }: AIChatbotP
   const handleSendMessage = async (message: string = inputMessage) => {
     if (!message.trim()) return;
 
-    if (message === inputMessage) {
-      const formattedMessage = `Please analyze this aspect of the social media data: "${message}"
+    setMessages(prev => [...prev, { role: 'user', content: message }]);
+    setInputMessage('');
+    setIsLoading(true);
 
-Provide your response in the following format:
-
-Metrics:
-  [Relevant metrics with proper spacing and indentation]
-
-Direct Answer:
-  [Clear, structured predictions or recommendations]
-
-Explanation:
-  [Detailed analysis with proper formatting]
-
-Suggestions:
-  [Well-formatted, actionable recommendations]`;
-
-      setMessages(prev => [...prev, { role: 'user', content: message }]);
-      setInputMessage('');
-      setIsLoading(true);
-
-      try {
-        const chatRequest: ChatRequest = {
-          dashboardData: dashboardData,
-          userMessage: formattedMessage,
-          chatHistory: messages
-        };
-        
-        const result = await sendChatMessage(chatRequest);
-        if (result && result.result) {
+    try {
+      const chatRequest: ChatRequest = {
+        dashboardData: dashboardData,
+        userMessage: message,
+        chatHistory: messages.map(m => ({
+          role: m.role,
+          content: typeof m.content === 'string' ? m.content : 'AI Response'
+        }))
+      };
+      
+      const result = await sendChatMessage(chatRequest);
+      if (result && result.result) {
+        if (result.result.includes("Uh-oh!")) {
+          setMessages(prev => [...prev, { 
+            role: 'assistant', 
+            content: result.result
+          }]);
+        } else {
           const insights = parseInsights(result.result);
           setMessages(prev => [...prev, { 
             role: 'assistant', 
             content: <InsightsDisplay insights={insights} />
           }]);
-        } else {
-          throw new Error('Invalid response format');
         }
-      } catch (error) {
-        console.error('Error details:', error);
-        setMessages(prev => [...prev, { 
-          role: 'assistant', 
-          content: 'Connection error. Please check your network connection and try again.' 
-        }]);
       }
-      setIsLoading(false);
+    } catch (error) {
+      console.error('Error details:', error);
+      setMessages(prev => [...prev, { 
+        role: 'assistant', 
+        content: 'Connection error. Please try again later.' 
+      }]);
     }
+    
+    setIsLoading(false);
   };
 
   const initializeChat = async () => {

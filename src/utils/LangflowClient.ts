@@ -14,32 +14,25 @@ export class LangflowClient {
     headers["Authorization"] = `Bearer ${this.applicationToken}`;
     headers["Content-Type"] = "application/json";
     
-    const url = `/api${endpoint}`;
+    const url = `${this.baseURL}${endpoint}`;
 
     try {
       const response = await fetch(url, {
         method: 'POST',
         headers: headers,
-        mode: 'cors',
-        credentials: 'same-origin',
         body: JSON.stringify(body)
       });
 
       if (!response.ok) {
-        const errorText = await response.text();
-        console.error('API Error:', {
-          status: response.status,
-          statusText: response.statusText,
-          body: errorText
-        });
-        throw new Error(`HTTP error! status: ${response.status}`);
+        throw new Error(`API Error: ${response.status} ${response.statusText}`);
       }
 
-      const responseMessage = await response.json();
-      return responseMessage;
+      return await response.json();
     } catch (error) {
       console.error('Request Error:', error);
-      throw error;
+      return {
+        result: "Uh-oh! There seems to be an error on our side. Please try again later."
+      };
     }
   }
 
@@ -86,40 +79,23 @@ export class LangflowClient {
     flowId: string,
     langflowId: string,
     tweaks: Record<string, any> = {},
-    stream = false,
-    callbacks?: StreamCallbacks
+    stream = false
   ) {
-    try {
-      const response = await this.initiateSession(flowId, langflowId, message, stream, tweaks);
-      
-      if (stream && callbacks && response.outputs?.[0]?.outputs?.[0]?.artifacts?.stream_url) {
-        const streamUrl = response.outputs[0].outputs[0].artifacts.stream_url;
-        console.log(`Streaming from: ${streamUrl}`);
-        return this.handleStream(streamUrl, callbacks);
-      }
-
-      if (response.outputs) {
-        const output = response.outputs[0]?.outputs?.[0]?.outputs?.message;
-        return {
-          result: output?.message?.text || response.result
-        };
-      }
-
-      return response;
-    } catch (error) {
-      console.error('Error running flow:', error);
-      callbacks?.onError?.('Error initiating session');
-      throw error;
-    }
+    const endpoint = `/lf/${langflowId}/api/v1/run/${flowId}`;
+    return this.post(endpoint, {
+      input_value: message,
+      input_type: "chat",
+      output_type: "chat",
+      tweaks: tweaks
+    });
   }
 }
 
 export const langflowClient = new LangflowClient(
-  '',
+  import.meta.env.VITE_LANGFLOW_API_URL || '',
   import.meta.env.VITE_LANGFLOW_ACCESS_TOKEN || ''
 );
 
-// Add error handling for missing environment variables
-if (!import.meta.env.VITE_LANGFLOW_ACCESS_TOKEN) {
-  console.error('Missing required environment variable: VITE_LANGFLOW_ACCESS_TOKEN');
+if (!import.meta.env.VITE_LANGFLOW_API_URL || !import.meta.env.VITE_LANGFLOW_ACCESS_TOKEN) {
+  console.error('Missing required environment variables');
 } 

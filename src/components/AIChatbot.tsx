@@ -1,12 +1,13 @@
 import { useState, useRef, useEffect } from 'react';
-import { X, Send } from 'lucide-react';
+import { X, Send, Bot, User } from 'lucide-react';
 import { sendChatMessage } from '../utils/api';
 import { parseInsights } from '../utils/insightParser';
 import { InsightsDisplay } from './InsightsDisplay';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface Message {
   role: 'user' | 'assistant';
-  content: string;
+  content: string | JSX.Element;
 }
 
 interface AIChatbotProps {
@@ -15,30 +16,25 @@ interface AIChatbotProps {
   dashboardData: any;
 }
 
-// Add this interface for structured responses
-interface AnalysisResponse {
-  metrics: {
-    engagement_rate: number;
-    avg_likes: number;
-    avg_shares: number;
-    avg_comments: number;
-    avg_views: number;
-    primary_age_groups: string[];
-  };
-  direct_answer: {
-    expected_likes: number;
-    expected_shares: number;
-    expected_comments: number;
-    expected_views: number;
-  };
-  explanation: string;
-  suggestions: {
-    optimal_posting_time: string;
-    hashtags: string[];
-    content_quality: string;
-    target_audience: string;
-  };
-}
+const ThinkingAnimation = () => (
+  <div className="flex items-center space-x-2 p-2">
+    <motion.div
+      className="w-2 h-2 bg-blue-500 rounded-full"
+      animate={{ scale: [1, 1.2, 1] }}
+      transition={{ duration: 1, repeat: Infinity }}
+    />
+    <motion.div
+      className="w-2 h-2 bg-blue-500 rounded-full"
+      animate={{ scale: [1, 1.2, 1] }}
+      transition={{ duration: 1, repeat: Infinity, delay: 0.2 }}
+    />
+    <motion.div
+      className="w-2 h-2 bg-blue-500 rounded-full"
+      animate={{ scale: [1, 1.2, 1] }}
+      transition={{ duration: 1, repeat: Infinity, delay: 0.4 }}
+    />
+  </div>
+);
 
 export default function AIChatbot({ isOpen, onClose, dashboardData }: AIChatbotProps) {
   const [messages, setMessages] = useState<Message[]>([]);
@@ -185,69 +181,103 @@ Please maintain consistent formatting with proper spacing and indentation.`;
     return formatted;
   };
 
-  if (!isOpen) return null;
-
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-xl w-full max-w-2xl h-[600px] flex flex-col relative">
-        <div className="flex items-center justify-between p-4 border-b">
-          <h2 className="text-xl font-semibold text-gray-800">AI Insights</h2>
-          <button
-            onClick={onClose}
-            className="p-1 hover:bg-gray-100 rounded-full transition-colors"
+    <AnimatePresence>
+      {isOpen && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+        >
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.9, opacity: 0 }}
+            className="bg-white rounded-xl w-full max-w-2xl h-[600px] flex flex-col relative"
           >
-            <X className="w-6 h-6 text-gray-500" />
-          </button>
-        </div>
-        
-        <div className="flex-1 overflow-y-auto p-4 space-y-4">
-          {messages.map((message, index) => (
-            <div
-              key={index}
-              className={`flex ${message.role === 'assistant' ? 'justify-start' : 'justify-end'}`}
-            >
-              <div
-                className={`max-w-[80%] p-3 rounded-lg ${
-                  message.role === 'assistant'
-                    ? 'bg-gray-100 text-gray-800'
-                    : 'bg-blue-600 text-white'
-                }`}
+            <div className="flex items-center justify-between p-4 border-b">
+              <h2 className="text-xl font-semibold text-gray-800">AI Insights</h2>
+              <button
+                onClick={onClose}
+                className="p-1 hover:bg-gray-100 rounded-full transition-colors"
               >
-                {message.content}
+                <X className="w-6 h-6 text-gray-500" />
+              </button>
+            </div>
+            
+            <div className="flex-1 overflow-y-auto p-4 space-y-4">
+              {messages.map((message, index) => (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  key={index}
+                  className={`flex ${message.role === 'assistant' ? 'justify-start' : 'justify-end'}`}
+                >
+                  <div className="flex items-start max-w-[80%] gap-2">
+                    {message.role === 'assistant' ? (
+                      <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
+                        <Bot className="w-5 h-5 text-blue-600" />
+                      </div>
+                    ) : (
+                      <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0 order-2">
+                        <User className="w-5 h-5 text-green-600" />
+                      </div>
+                    )}
+                    <div
+                      className={`p-3 rounded-lg ${
+                        message.role === 'assistant'
+                          ? 'bg-gray-100 text-gray-800'
+                          : 'bg-blue-600 text-white order-1'
+                      }`}
+                    >
+                      {message.content}
+                    </div>
+                  </div>
+                </motion.div>
+              ))}
+              {isLoading && (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="flex justify-start"
+                >
+                  <div className="flex items-start gap-2">
+                    <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
+                      <Bot className="w-5 h-5 text-blue-600" />
+                    </div>
+                    <div className="bg-gray-100 text-gray-800 p-3 rounded-lg">
+                      <ThinkingAnimation />
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+              <div ref={chatEndRef} />
+            </div>
+            
+            <div className="p-4 border-t">
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={inputMessage}
+                  onChange={(e) => setInputMessage(e.target.value)}
+                  onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+                  placeholder="Ask me anything about your social media data..."
+                  className="flex-1 p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+                <button
+                  onClick={() => handleSendMessage()}
+                  disabled={isLoading || !inputMessage.trim()}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                >
+                  <Send className="w-4 h-4" />
+                  Send
+                </button>
               </div>
             </div>
-          ))}
-          {isLoading && (
-            <div className="flex justify-start">
-              <div className="bg-gray-100 text-gray-800 p-3 rounded-lg">
-                Thinking...
-              </div>
-            </div>
-          )}
-          <div ref={chatEndRef} />
-        </div>
-        
-        <div className="p-4 border-t">
-          <div className="flex gap-2">
-            <input
-              type="text"
-              value={inputMessage}
-              onChange={(e) => setInputMessage(e.target.value)}
-              onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
-              placeholder="Ask me anything about your social media data..."
-              className="flex-1 p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-            <button
-              onClick={handleSendMessage}
-              disabled={isLoading || !inputMessage.trim()}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-            >
-              <Send className="w-4 h-4" />
-              Send
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 } 

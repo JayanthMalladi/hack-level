@@ -14,9 +14,10 @@ import {
 } from 'chart.js';
 import { Bar, Pie, Line } from 'react-chartjs-2';
 import type { PostData } from '../types/PostData';
-import { TrendingUp, Users, Eye, Share2, MessageCircle, ThumbsUp } from 'lucide-react';
+import { TrendingUp, Users, Eye, Share2, MessageCircle, ThumbsUp, Brain } from 'lucide-react';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
 import { motion } from 'framer-motion';
+import AIChatbot from './AIChatbot';
 
 ChartJS.register(
   CategoryScale,
@@ -35,6 +36,7 @@ export default function Dashboard() {
   const [data, setData] = useState<PostData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isAIChatOpen, setIsAIChatOpen] = useState(false);
 
   // Define chartColors here, before useMemo
   const chartColors = {
@@ -383,8 +385,17 @@ export default function Dashboard() {
           <h1 className="text-4xl font-bold bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">
             Social Media Analytics Dashboard
           </h1>
-          <div className="text-sm text-gray-600">
-            Last updated: {new Date().toLocaleDateString()}
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => setIsAIChatOpen(true)}
+              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              <Brain className="w-5 h-5" />
+              Get Insights with AI
+            </button>
+            <div className="text-sm text-gray-600">
+              Last updated: {new Date().toLocaleDateString()}
+            </div>
           </div>
         </motion.div>
         
@@ -605,6 +616,11 @@ export default function Dashboard() {
           </motion.div>
         </motion.div>
       </motion.div>
+      <AIChatbot 
+        isOpen={isAIChatOpen}
+        onClose={() => setIsAIChatOpen(false)}
+        dashboardData={data}
+      />
     </div>
   );
 } 

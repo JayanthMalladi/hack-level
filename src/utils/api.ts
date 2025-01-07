@@ -30,6 +30,8 @@ export const sendChatMessage = async (request: ChatRequest) => {
     throw new Error('Invalid response format');
   } catch (error) {
     console.error('API Error:', error);
-    throw error;
+    return {
+      result: "Uh-oh! There seems to be an error on our side, give us some time to fix it."
+    };
   }
 }; 

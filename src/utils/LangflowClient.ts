@@ -116,5 +116,10 @@ export class LangflowClient {
 
 export const langflowClient = new LangflowClient(
   '',
-  'AstraCS:YKRGKfIXjCsXShKGmPoWZLoQ:3c2bcc8d06a34fd2fe32d8a084a9e5dee0e63617c1eab8d0f7f6243e15f5c68f'
-); 
+  import.meta.env.VITE_LANGFLOW_ACCESS_TOKEN || ''
+);
+
+// Add error handling for missing environment variables
+if (!import.meta.env.VITE_LANGFLOW_ACCESS_TOKEN) {
+  console.error('Missing required environment variable: VITE_LANGFLOW_ACCESS_TOKEN');
+} 

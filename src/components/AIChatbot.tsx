@@ -100,49 +100,37 @@ Suggestions:
 
   const initializeChat = async () => {
     if (messages.length === 0) {
-      const initialPrompt = `Analyze this social media post plan:
+      const initialPrompt = `Analyze the social media data and provide insights in exactly this format:
 
-INPUT_DATA:
-Content Type: {content_type}
-Post Theme: {post_theme}
-Post Day: {post_day}
-Post Time: {post_time}
+### Metrics
+- **Engagement Rate:** [average engagement rate]%
+- **Likes:** [average likes]
+- **Shares:** [average shares]
+- **Comments:** [average comments]
+- **Views:** [average views]
+- **Primary Age Group:** [most common age group]
+- **Gender Split:** [percentage split between male/female/other]
 
-Please provide insights in exactly this format:
+### Format Insights
+- [Compare performance of different post types (photo, video, carousel, reel, story)]
+- [Include specific percentage differences in engagement]
 
-METRICS:
-Engagement Rate: [number]%
-Average Likes: [number]
-Average Shares: [number]
-Average Comments: [number]
-Average Views: [number]
-Primary Age Groups: [age range]
+### Predictions
+- **Expected Likes:** [number]
+- **Expected Shares:** [number]
+- **Expected Comments:** [number]
+- **Expected Views:** [number]
 
-FORMAT_INSIGHTS:
-- [format_type] posts have [number]% higher engagement than [comparison_format]
-- [format_type] generate [number]x more [metric] than [comparison_format]
+### Explanation
+- [Analysis based on post_type, post_day, post_time, and engagement patterns]
+- [Include correlations between hashtags and engagement]
+- [Mention demographic preferences]
 
-DIRECT_ANSWER:
-Expected Likes: [number]
-Expected Shares: [number]
-Expected Comments: [number]
-Expected Views: [number]
-
-EXPLANATION:
-[2-3 sentences analyzing engagement predictions based on timing, themes, and audience data]
-
-SUGGESTIONS:
-TIMING:
-[specific day and time recommendation with clear reasoning]
-
-HASHTAGS:
-#[hashtag1] #[hashtag2] #[hashtag3] #[hashtag4] #[hashtag5]
-
-CONTENT:
-[1-2 specific content improvement tips]
-
-AUDIENCE:
-[specific demographic targeting recommendation]`;
+### Suggestions
+- **Optimal Posting Time:** [Best performing day and time based on engagement_rate]
+- **Hashtags:** [Top performing hashtags from hashtags_used]
+- **Content Quality:** [Recommendations based on post_type performance]
+- **Target Audience:** [Recommendations based on primary_age_group and engagement]`;
 
       await handleSendMessage(initialPrompt);
     }

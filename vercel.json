@@ -3,10 +3,6 @@
     {
       "source": "/api/:path*",
       "destination": "https://api.langflow.astra.datastax.com/:path*"
-    },
-    {
-      "source": "/(.*)",
-      "destination": "/index.html"
     }
   ],
   "headers": [
@@ -18,9 +14,5 @@
         { "key": "Access-Control-Allow-Headers", "value": "*" }
       ]
     }
-  ],
-  "buildCommand": "npm run build",
-  "outputDirectory": "dist",
-  "framework": "vite",
-  "installCommand": "npm install"
+  ]
 } 

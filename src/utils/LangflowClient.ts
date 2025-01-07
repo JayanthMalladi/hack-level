@@ -14,7 +14,7 @@ export class LangflowClient {
     headers["Authorization"] = `Bearer ${this.applicationToken}`;
     headers["Content-Type"] = "application/json";
     
-    const url = `${this.baseURL}${endpoint}`;
+    const url = `/api${endpoint}`;
 
     try {
       const response = await fetch(url, {
@@ -92,10 +92,10 @@ export class LangflowClient {
 }
 
 export const langflowClient = new LangflowClient(
-  import.meta.env.VITE_LANGFLOW_API_URL || '',
+  '',
   import.meta.env.VITE_LANGFLOW_ACCESS_TOKEN || ''
 );
 
-if (!import.meta.env.VITE_LANGFLOW_API_URL || !import.meta.env.VITE_LANGFLOW_ACCESS_TOKEN) {
+if (!import.meta.env.VITE_LANGFLOW_ACCESS_TOKEN) {
   console.error('Missing required environment variables');
 } 

@@ -100,33 +100,49 @@ Suggestions:
 
   const initializeChat = async () => {
     if (messages.length === 0) {
-      const initialPrompt = `Please analyze the social media data and provide insights in the following format:
+      const initialPrompt = `Analyze this social media post plan:
 
-Metrics:
-  Provide detailed metrics including:
-  - Average engagement rate across all posts
-  - Average number of likes per post
-  - Average shares per post
-  - Average comments per post
-  - Average views per post
-  - Primary age groups that engage most
+INPUT_DATA:
+Content Type: {content_type}
+Post Theme: {post_theme}
+Post Day: {post_day}
+Post Time: {post_time}
 
-Direct Answer:
-  - Expected Likes: [number]
-  - Expected Shares: [number]
-  - Expected Comments: [number]
-  - Expected Views: [number]
+Please provide insights in exactly this format:
 
-Explanation:
-  Provide a clear analysis of the data and factors affecting engagement.
+METRICS:
+Engagement Rate: [number]%
+Average Likes: [number]
+Average Shares: [number]
+Average Comments: [number]
+Average Views: [number]
+Primary Age Groups: [age range]
 
-Suggestions:
-  - Optimal Posting Time: [specific time recommendation]
-  - Hashtags: [list of recommended hashtags]
-  - Content Quality: [specific content recommendations]
-  - Target Audience: [audience targeting suggestions]
+FORMAT_INSIGHTS:
+- [format_type] posts have [number]% higher engagement than [comparison_format]
+- [format_type] generate [number]x more [metric] than [comparison_format]
 
-Please maintain consistent formatting with proper spacing and indentation.`;
+DIRECT_ANSWER:
+Expected Likes: [number]
+Expected Shares: [number]
+Expected Comments: [number]
+Expected Views: [number]
+
+EXPLANATION:
+[2-3 sentences analyzing engagement predictions based on timing, themes, and audience data]
+
+SUGGESTIONS:
+TIMING:
+[specific day and time recommendation with clear reasoning]
+
+HASHTAGS:
+#[hashtag1] #[hashtag2] #[hashtag3] #[hashtag4] #[hashtag5]
+
+CONTENT:
+[1-2 specific content improvement tips]
+
+AUDIENCE:
+[specific demographic targeting recommendation]`;
 
       await handleSendMessage(initialPrompt);
     }

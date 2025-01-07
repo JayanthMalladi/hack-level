@@ -51,86 +51,85 @@ export function parseInsights(response: string): InsightData {
 
   try {
     // Extract metrics section
-    const metricsMatch = response.match(/Metrics:\s*([^]*?)(?=Format Insights:|$)/i);
+    const metricsMatch = response.match(/METRICS:\n([^]*?)(?=\n\nFORMAT_INSIGHTS:)/i);
     if (metricsMatch) {
       const metricsText = metricsMatch[1];
-
-      // Extract metrics with flexible patterns
+      
+      // Extract each metric with exact patterns
       const extractMetric = (pattern: string): string => {
         const match = metricsText.match(new RegExp(pattern, 'i'));
-        return match ? match[1].replace(/,/g, '') : '0';
+        return match ? match[1].replace(/,/g, '').trim() : '0';
       };
 
-      insights.metrics.engagement = extractMetric('engagement rate[^\\d]*(\\d+(?:\\.\\d+)?)%') + '%';
-      insights.metrics.likes = extractMetric('(?:average )?likes[^\\d]*(\\d[\\d,]*)');
-      insights.metrics.shares = extractMetric('(?:average )?shares[^\\d]*(\\d[\\d,]*)');
-      insights.metrics.comments = extractMetric('(?:average )?comments[^\\d]*(\\d[\\d,]*)');
-      insights.metrics.views = extractMetric('(?:average )?views[^\\d]*(\\d[\\d,]*)');
-
-      // Extract age groups
-      const ageGroupsMatch = metricsText.match(/(?:age groups?|demographics?)[^:]*?(\d+(?:-\d+)?)/gi);
-      if (ageGroupsMatch) {
-        insights.metrics.ageGroups = ageGroupsMatch.map(match => {
-          const numbers = match.match(/\d+(?:-\d+)?/);
-          return numbers ? numbers[0] : '';
-        }).filter(Boolean);
-      }
+      insights.metrics = {
+        engagement: extractMetric('Engagement Rate:\\s*([\\d.]+)%') + '%',
+        likes: extractMetric('Average Likes:\\s*([\\d,]+)'),
+        shares: extractMetric('Average Shares:\\s*([\\d,]+)'),
+        comments: extractMetric('Average Comments:\\s*([\\d,]+)'),
+        views: extractMetric('Average Views:\\s*([\\d,]+)'),
+        ageGroups: (metricsText.match(/Primary Age Groups:\s*([^\n]+)/i)?.[1] || '')
+          .split(',')
+          .map(group => group.trim())
+          .filter(Boolean)
+      };
     }
 
     // Extract format insights
-    const formatMatch = response.match(/Format Insights:\s*([^]*?)(?=Direct Answer:|$)/i);
+    const formatMatch = response.match(/FORMAT_INSIGHTS:\n([^]*?)(?=\n\nDIRECT_ANSWER:)/i);
     if (formatMatch) {
       insights.formatInsights = formatMatch[1]
         .split('\n')
         .map(line => line.trim())
-        .filter(line => line.startsWith('-') || line.startsWith('•'))
-        .map(line => line.replace(/^[•-]\s*/, '').trim());
+        .filter(line => line.startsWith('-'))
+        .map(line => line.substring(1).trim());
     }
 
-    // Extract predictions
-    const directMatch = response.match(/Direct Answer:\s*([^]*?)(?=Explanation:|$)/i);
+    // Extract predictions from Direct Answer
+    const directMatch = response.match(/DIRECT_ANSWER:\n([^]*?)(?=\n\nEXPLANATION:)/i);
     if (directMatch) {
       const directText = directMatch[1];
-
+      
       const extractPrediction = (pattern: string): string => {
         const match = directText.match(new RegExp(pattern, 'i'));
-        return match ? match[1].replace(/,/g, '').replace(/around|about|approximately/i, '').trim() : '0';
+        return match ? match[1].replace(/,/g, '').trim() : '0';
       };
 
-      insights.predictions.likes = extractPrediction('Expected Likes:[^\\d]*(\\d[\\d,]*)');
-      insights.predictions.shares = extractPrediction('Expected Shares:[^\\d]*(\\d[\\d,]*)');
-      insights.predictions.comments = extractPrediction('Expected Comments:[^\\d]*(\\d[\\d,]*)');
-      insights.predictions.views = extractPrediction('Expected Views:[^\\d]*(\\d[\\d,]*)');
+      insights.predictions = {
+        likes: extractPrediction('Expected Likes:\\s*([\\d,]+)'),
+        shares: extractPrediction('Expected Shares:\\s*([\\d,]+)'),
+        comments: extractPrediction('Expected Comments:\\s*([\\d,]+)'),
+        views: extractPrediction('Expected Views:\\s*([\\d,]+)')
+      };
     }
 
     // Extract explanation
-    const explanationMatch = response.match(/Explanation:\s*([^]*?)(?=Suggestion:|$)/i);
+    const explanationMatch = response.match(/EXPLANATION:\n([^]*?)(?=\n\nSUGGESTIONS:)/i);
     if (explanationMatch) {
       insights.analysis = explanationMatch[1].trim();
     }
 
     // Extract recommendations
-    const suggestionsMatch = response.match(/Suggestion:\s*([^]*?)$/i);
+    const suggestionsMatch = response.match(/SUGGESTIONS:\n([^]*?)$/i);
     if (suggestionsMatch) {
       const suggestionsText = suggestionsMatch[1];
 
       // Extract timing
-      const timingMatch = suggestionsText.match(/Optimal Posting Time:\s*([^]*?)(?=Hashtags:|$)/i);
+      const timingMatch = suggestionsText.match(/TIMING:\n([^]*?)(?=\n\nHASHTAGS:)/i);
       insights.recommendations.timing = timingMatch ? timingMatch[1].trim() : '';
 
       // Extract hashtags
-      const hashtagsMatch = suggestionsText.match(/Hashtags:\s*([^]*?)(?=Content Quality:|$)/i);
+      const hashtagsMatch = suggestionsText.match(/HASHTAGS:\n([^]*?)(?=\n\nCONTENT:)/i);
       if (hashtagsMatch) {
         insights.recommendations.hashtags = hashtagsMatch[1]
           .match(/#[\w\d]+/g) || [];
       }
 
       // Extract content tips
-      const contentMatch = suggestionsText.match(/Content Quality:\s*([^]*?)(?=Target Audience:|$)/i);
+      const contentMatch = suggestionsText.match(/CONTENT:\n([^]*?)(?=\n\nAUDIENCE:)/i);
       insights.recommendations.contentTips = contentMatch ? contentMatch[1].trim() : '';
 
       // Extract audience info
-      const audienceMatch = suggestionsText.match(/Target Audience:\s*([^]*?)(?=\n|$)/i);
+      const audienceMatch = suggestionsText.match(/AUDIENCE:\n([^]*?)$/i);
       insights.recommendations.audience = audienceMatch ? audienceMatch[1].trim() : '';
     }
 

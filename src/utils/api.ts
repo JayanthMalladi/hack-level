@@ -13,7 +13,18 @@ export const sendChatMessage = async (request: ChatRequest) => {
   try {
     const formattedRequest = {
       data: request.dashboardData,
-      message: request.userMessage,
+      message: `Analyze this social media data and provide insights in exactly this format:
+
+### Metrics
+- **Engagement Rate:** [average engagement rate]%
+- **Likes:** [average likes]
+- **Shares:** [average shares]
+- **Comments:** [average comments]
+- **Views:** [average views]
+- **Primary Age Group:** [most common age group]
+- **Gender Split:** [percentage split between male/female/other]
+
+Question: ${request.userMessage}`,
       history: request.chatHistory,
       timestamp: new Date().toISOString()
     };
@@ -25,13 +36,18 @@ export const sendChatMessage = async (request: ChatRequest) => {
     );
     
     if (response && response.result) {
-      return response;
+      return {
+        result: response.result
+      };
     }
-    throw new Error('Invalid response format');
+
+    return {
+      result: "Uh-oh! There seems to be an error on our side. Please try again later."
+    };
   } catch (error) {
     console.error('API Error:', error);
     return {
-      result: "Uh-oh! There seems to be an error on our side, give us some time to fix it."
+      result: "Uh-oh! There seems to be an error on our side. Please try again later."
     };
   }
 }; 

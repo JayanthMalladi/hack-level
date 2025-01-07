@@ -89,53 +89,18 @@ export default function AIChatbot({ isOpen, onClose, dashboardData }: AIChatbotP
     setIsLoading(false);
   };
 
-  const initializeChat = async () => {
-    if (messages.length === 0) {
-      const initialPrompt = `Analyze the social media data and provide insights in exactly this format:
-
-### Metrics
-- **Engagement Rate:** [average engagement rate]%
-- **Likes:** [average likes]
-- **Shares:** [average shares]
-- **Comments:** [average comments]
-- **Views:** [average views]
-- **Primary Age Group:** [most common age group]
-- **Gender Split:** [percentage split between male/female/other]
-
-### Format Insights
-- [Compare performance of different post types (photo, video, carousel, reel, story)]
-- [Include specific percentage differences in engagement]
-
-### Predictions
-- **Expected Likes:** [number]
-- **Expected Shares:** [number]
-- **Expected Comments:** [number]
-- **Expected Views:** [number]
-
-### Explanation
-- [Analysis based on post_type, post_day, post_time, and engagement patterns]
-- [Include correlations between hashtags and engagement]
-- [Mention demographic preferences]
-
-### Suggestions
-- **Optimal Posting Time:** [Best performing day and time based on engagement_rate]
-- **Hashtags:** [Top performing hashtags from hashtags_used]
-- **Content Quality:** [Recommendations based on post_type performance]
-- **Target Audience:** [Recommendations based on primary_age_group and engagement]`;
-
-      await handleSendMessage(initialPrompt);
-    }
-  };
-
-  useEffect(() => {
-    if (isOpen) {
-      initializeChat();
-    }
-  }, [isOpen]);
-
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  useEffect(() => {
+    if (isOpen && messages.length === 0) {
+      setMessages([{
+        role: 'assistant',
+        content: 'Hi! I can help you analyze your social media data. What would you like to know?'
+      }]);
+    }
+  }, [isOpen]);
 
   // Add a helper function to format responses
   const formatResponse = (response: string): string => {

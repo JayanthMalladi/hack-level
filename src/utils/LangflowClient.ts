@@ -82,12 +82,20 @@ export class LangflowClient {
     stream = false
   ) {
     const endpoint = `/lf/${langflowId}/api/v1/run/${flowId}`;
-    return this.post(endpoint, {
+    const response = await this.post(endpoint, {
       input_value: message,
-      input_type: "chat",
-      output_type: "chat",
+      input_type: "text",
+      output_type: "text",
       tweaks: tweaks
     });
+
+    if (response && response.output && response.output.length > 0) {
+      return {
+        result: response.output[0].text || response.output[0].message || "No response"
+      };
+    }
+
+    return response;
   }
 }
 

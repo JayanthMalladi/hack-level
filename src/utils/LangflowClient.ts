@@ -5,9 +5,6 @@ export interface LangflowConfig {
 }
 
 export class LangflowClient {
-  private readonly BASE_API_URL = "https://api.langflow.astra.datastax.com";
-  private readonly LANGFLOW_ID = "396deb1c-aadd-4f18-bd9e-a350c13098df";
-  private readonly FLOW_ID = "bca2b923-d854-4755-86a8-0b51c350c42b";
   private readonly TWEAKS = {
     "ChatInput-607TC": {},
     "ParseData-N1SbE": {},
@@ -28,8 +25,6 @@ export class LangflowClient {
     message: string,
     config: LangflowConfig = {}
   ) {
-    const apiUrl = `${this.BASE_API_URL}/lf/${this.LANGFLOW_ID}/api/v1/run/${this.FLOW_ID}`;
-
     const payload = {
       input_value: message,
       output_type: config.output_type || "chat",
@@ -38,20 +33,17 @@ export class LangflowClient {
     };
 
     console.log('API Request:', {
-      url: apiUrl,
       payload,
       headers: {
-        "Authorization": `Bearer ${this.applicationToken}`,
-        "Content-Type": "application/json"
+        Authorization: 'Bearer ****'
       }
     });
 
     try {
-      const response = await fetch(apiUrl, {
+      const response = await fetch('/api/langflow', {
         method: 'POST',
         headers: {
-          "Authorization": `Bearer ${this.applicationToken}`,
-          "Content-Type": "application/json"
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify(payload)
       });

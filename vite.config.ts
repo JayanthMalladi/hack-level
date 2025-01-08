@@ -8,16 +8,14 @@ export default defineConfig({
   },
   server: {
     proxy: {
-      '/api': {
+      '/api/langflow': {
         target: 'https://api.langflow.astra.datastax.com',
         changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api/, ''),
-        configure: (proxy) => {
-          proxy.on('error', (err) => {
-            console.log('proxy error', err);
-          });
-        }
-      }
-    }
-  }
+        rewrite: (path) => path.replace(/^\/api\/langflow/, ''),
+        headers: {
+          'Authorization': `Bearer ${process.env.VITE_LANGFLOW_ACCESS_TOKEN}`,
+        },
+      },
+    },
+  },
 });

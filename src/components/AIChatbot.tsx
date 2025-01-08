@@ -49,11 +49,14 @@ export default function AIChatbot({ isOpen, onClose, dashboardData }: AIChatbotP
   const handleSendMessage = async (message: string = inputMessage) => {
     if (!message.trim()) return;
 
+    console.log('Sending message:', message);
+    
     setMessages(prev => [...prev, { role: 'user', content: message }]);
     setInputMessage('');
     setIsLoading(true);
 
     try {
+      console.log('Preparing chat request with dashboard data');
       const chatRequest: ChatRequest = {
         dashboardData: dashboardData,
         userMessage: message,
@@ -63,15 +66,21 @@ export default function AIChatbot({ isOpen, onClose, dashboardData }: AIChatbotP
         }))
       };
       
+      console.log('Sending chat request:', chatRequest);
       const result = await sendChatMessage(chatRequest);
+      console.log('Received chat response:', result);
+
       if (result && result.result) {
         if (result.result.includes("Uh-oh!")) {
+          console.log('Error response received');
           setMessages(prev => [...prev, { 
             role: 'assistant', 
             content: result.result
           }]);
         } else {
+          console.log('Parsing insights from response');
           const insights = parseInsights(result.result);
+          console.log('Parsed insights:', insights);
           setMessages(prev => [...prev, { 
             role: 'assistant', 
             content: <InsightsDisplay insights={insights} />
@@ -79,7 +88,11 @@ export default function AIChatbot({ isOpen, onClose, dashboardData }: AIChatbotP
         }
       }
     } catch (error) {
-      console.error('Error details:', error);
+      console.error('Chat Error Full Details:', {
+        error,
+        message: error.message,
+        stack: error.stack
+      });
       setMessages(prev => [...prev, { 
         role: 'assistant', 
         content: 'Connection error. Please try again later.' 

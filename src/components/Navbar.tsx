@@ -13,7 +13,7 @@ export default function Navbar() {
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center">
             <Link to="/" className="text-xl font-bold gradient-text">
-              YourLogo
+              SnapFluence
             </Link>
           </div>
           

@@ -1,8 +1,5 @@
 import { langflowClient } from './LangflowClient';
 
-const FLOW_ID = 'bca2b923-d854-4755-86a8-0b51c350c42b';
-const LANGFLOW_ID = '396deb1c-aadd-4f18-bd9e-a350c13098df';
-
 export interface ChatRequest {
   dashboardData: any;
   userMessage: string;
@@ -11,41 +8,46 @@ export interface ChatRequest {
 
 export const sendChatMessage = async (request: ChatRequest) => {
   try {
-    const formattedRequest = {
+    console.log('Chat Request:', {
+      dashboardData: request.dashboardData,
+      messageLength: request.userMessage.length,
+      historyLength: request.chatHistory.length
+    });
+
+    const formattedMessage = {
       data: request.dashboardData,
-      message: `Analyze this social media data and provide insights in exactly this format:
-
-### Metrics
-- **Engagement Rate:** [average engagement rate]%
-- **Likes:** [average likes]
-- **Shares:** [average shares]
-- **Comments:** [average comments]
-- **Views:** [average views]
-- **Primary Age Group:** [most common age group]
-- **Gender Split:** [percentage split between male/female/other]
-
-Question: ${request.userMessage}`,
-      history: request.chatHistory,
-      timestamp: new Date().toISOString()
+      message: request.userMessage,
+      history: request.chatHistory
     };
+
+    console.log('Formatted Message:', formattedMessage);
 
     const response = await langflowClient.runFlow(
-      JSON.stringify(formattedRequest),
-      FLOW_ID,
-      LANGFLOW_ID
+      JSON.stringify(formattedMessage),
+      {
+        input_type: "chat",
+        output_type: "chat"
+      }
     );
-    
-    if (response && response.result) {
-      return {
-        result: response.result
+
+    console.log('Langflow Response:', response);
+
+    if (response && response.output && response.output.length > 0) {
+      const result = {
+        result: response.output[0].text || response.output[0].message || response.result
       };
+      console.log('Parsed Result:', result);
+      return result;
     }
 
-    return {
-      result: "Uh-oh! There seems to be an error on our side. Please try again later."
-    };
+    console.error('Invalid Response Format:', response);
+    throw new Error('Invalid response format');
   } catch (error) {
-    console.error('API Error:', error);
+    console.error('API Error Full Details:', {
+      error,
+      message: error.message,
+      stack: error.stack
+    });
     return {
       result: "Uh-oh! There seems to be an error on our side. Please try again later."
     };

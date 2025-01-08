@@ -1,8 +1,10 @@
 {
-  "rewrites": [
+  "version": 2,
+  "routes": [
     {
-      "source": "/api/:path*",
-      "destination": "https://api.langflow.astra.datastax.com/:path*"
+      "src": "/api/langflow",
+      "methods": ["POST", "OPTIONS"],
+      "dest": "/api/langflow.ts"
     }
   ],
   "headers": [
